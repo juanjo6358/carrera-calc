@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculadora de carrera — PWA</title>
+<meta name="theme-color" content="#22c55e" />
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111827; --panel-2:#1f2937; --text:#e5e7eb; --muted:#9ca3af;
+    --brand:#22c55e; --brand-2:#16a34a; --error:#ef4444; --focus:#93c5fd;
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 600px at 20% -10%, #1e293b, transparent), var(--bg);
+    color:var(--text); line-height:1.4; min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .app{ width:min(880px, 100%); background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border:1px solid #1f2937; border-radius:16px; padding:22px; box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06); backdrop-filter: blur(6px); }
+  header{ display:flex; gap:14px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  h1{font-size:1.25rem; margin:0;} .sub{color:var(--muted); font-size:.95rem}
+  .row{display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px;}
+  @media (min-width:720px){ .row.two{grid-template-columns: 1fr 1fr;} .row.layout{grid-template-columns: 1fr 2fr;} }
+  .card{ background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid var(--panel-2); border-radius:12px; padding:14px; }
+  label{display:block; font-weight:600; margin-bottom:6px;} .hint{font-size:.85rem; color:var(--muted); margin-top:4px}
+  .field{ display:flex; align-items:center; gap:10px; border:1px solid #374151; border-radius:10px; padding:10px 12px; background:#0b1222; }
+  .field input{ background:transparent; border:0; color:var(--text); outline:none; width:100%; font-size:1rem; }
+  .segmented{ display:flex; background:#0b1222; border:1px solid #374151; border-radius:10px; padding:6px; gap:6px; }
+  .segmented input{display:none}
+  .segmented label{ flex:1; text-align:center; padding:10px 8px; border-radius:8px; cursor:pointer; user-select:none; border:1px solid transparent; font-weight:600; }
+  .segmented input:checked + label{ background: var(--brand); color:#052e16; border-color:transparent; }
+  .units{ display:flex; gap:8px; align-items:center; }
+  .units button{ appearance:none; border-radius:8px; padding:8px 12px; background:#0b1222; color:var(--text); border:1px solid #374151; cursor:pointer; font-weight:600; }
+  .units button[aria-pressed="true"]{ background:var(--brand); color:#052e16; border-color:transparent; }
+  .btn{ appearance:none; padding:12px 16px; border-radius:10px; border:1px solid #2a333f; background:linear-gradient(180deg, var(--brand), var(--brand-2)); color:#052e16; font-weight:800; cursor:pointer; width:100%; }
+  .btn.secondary{ background:#0b1222; color:var(--text); border:1px solid #374151; }
+  .result{ display:flex; gap:12px; align-items:center; justify-content:space-between; background:#061227; border:1px solid #1f2a41; border-radius:12px; padding:14px; }
+  .result h2{margin:0; font-size:1.4rem} .result .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+  .muted{color:var(--muted)} .error{color:var(--error); font-weight:600} .footer{margin-top:10px; color:var(--muted); font-size:.9rem}
+  .stack{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Calculadora de ritmo, tiempo y distancia para correr">
+    <header>
+      <div>
+        <h1>Calculadora de carrera</h1>
+        <div class="sub">PWA: instálala y úsala sin conexión. Introduce dos valores y calcula el tercero.</div>
+      </div>
+      <div class="units" role="group" aria-label="Unidades">
+        <span class="muted">Unidades:</span>
+        <button id="kmBtn" aria-pressed="true">km</button>
+        <button id="miBtn" aria-pressed="false">mi</button>
+      </div>
+    </header>
+
+    <div class="row layout">
+      <div class="card">
+        <div class="segmented" role="tablist" aria-label="Modo de cálculo">
+          <input type="radio" id="modo-tiempo" name="modo" value="time" checked>
+          <label for="modo-tiempo" role="tab" aria-controls="panel-tiempo">Calcular <u>Tiempo</u></label>
+          <input type="radio" id="modo-ritmo" name="modo" value="pace">
+          <label for="modo-ritmo" role="tab" aria-controls="panel-ritmo">Calcular <u>Ritmo</u></label>
+          <input type="radio" id="modo-dist" name="modo" value="distance">
+          <label for="modo-dist" role="tab" aria-controls="panel-dist">Calcular <u>Distancia</u></label>
+        </div>
+
+        <div class="row two" style="margin-top:14px">
+          <div>
+            <label for="distance">Distancia</label>
+            <div class="field">
+              <input id="distance" type="number" inputmode="decimal" step="0.01" min="0" placeholder="9.70">
+              <span id="unitDistance" class="muted">km</span>
+            </div>
+            <div class="hint">Ej.: 5, 9.7, 21.097, 42.195</div>
+          </div>
+          <div id="paceBlock">
+            <label for="pace">Ritmo</label>
+            <div class="field">
+              <input id="pace" type="text" inputmode="numeric" placeholder="mm:ss (p. ej. 4:40)" aria-describedby="paceHint">
+              <span id="unitPace" class="muted">/km</span>
+            </div>
+            <div id="paceHint" class="hint">Formato mm:ss (o hh:mm:ss). También acepta “m'ss” (4'40).</div>
+          </div>
+          <div id="timeBlock">
+            <label for="time">Tiempo</label>
+            <div class="field">
+              <input id="time" type="text" inputmode="numeric" placeholder="hh:mm:ss (p. ej. 00:45:16)" aria-describedby="timeHint">
+            </div>
+            <div id="timeHint" class="hint">Formato hh:mm:ss (o mm:ss). Ej.: 45:16</div>
+          </div>
+        </div>
+
+        <div class="row two" style="margin-top:8px">
+          <div class="stack">
+            <label class="muted">Redondeo ritmo:</label>
+            <div class="segmented" role="group" aria-label="Redondeo">
+              <input type="radio" id="round-none" name="round" value="none" checked><label for="round-none">Exacto</label>
+              <input type="radio" id="round-sec" name="round" value="sec"><label for="round-sec">Al segundo</label>
+              <input type="radio" id="round-5sec" name="round" value="5sec"><label for="round-5sec">a 5 s</label>
+              <input type="radio" id="round-10sec" name="round" value="10sec"><label for="round-10sec">a 10 s</label>
+            </div>
+          </div>
+          <div class="stack">
+            <button id="swap" class="btn secondary" title="Intercambiar tiempo ↔ ritmo">Intercambiar tiempo ↔ ritmo</button>
+            <button id="reset" class="btn secondary" title="Borrar">Borrar</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button id="calc" class="btn">Calcular</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="result" role="status" aria-live="polite">
+          <div>
+            <h2 id="mainResult" class="mono">—</h2>
+            <div class="muted" id="subResult"></div>
+          </div>
+          <div class="stack">
+            <button id="share" class="btn secondary">Compartir resultado</button>
+            <button id="copy" class="btn secondary">Copiar</button>
+            <button id="install" class="btn secondary" style="display:none">Instalar</button>
+          </div>
+        </div>
+        <div class="footer">
+          Consejos: el SW requiere https o localhost (no funciona en file://). En iOS, usa “Compartir → Añadir a pantalla de inicio”.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const el = id => document.getElementById(id);
+
+  const distance = el('distance');
+  const pace = el('pace');
+  const time = el('time');
+  const unitDistance = el('unitDistance');
+  const unitPace = el('unitPace');
+  const mainResult = el('mainResult');
+  const subResult = el('subResult');
+  const kmBtn = el('kmBtn');
+  const miBtn = el('miBtn');
+
+  const installBtn = el('install');
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+  installBtn.addEventListener('click', async () => {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
+
+  const modes = {
+    time: el('modo-tiempo'),
+    pace: el('modo-ritmo'),
+    distance: el('modo-dist')
+  };
+
+  let units = 'km';
+  let roundMode = 'none';
+
+  function sanitizeNumber(v){ return (typeof v === 'string' ? v.replace(',', '.').trim() : v); }
+  function parseDistance(value){ const v = parseFloat(sanitizeNumber(value)); return (Number.isFinite(v) && v > 0) ? v : NaN; }
+
+  function parseHMS(str){
+    if(!str) return NaN;
+    str = str.trim().toLowerCase().replace(/h/g,':').replace(/m/g,':').replace(/s/g,'').replace(/'+/g,':');
+    const parts = str.split(':').filter(Boolean).map(p => p.trim());
+    if(parts.length === 1){
+      const num = parseFloat(sanitizeNumber(parts[0])); if(!Number.isFinite(num)) return NaN; return (num > 10 ? num*60 : num);
+    }
+    if(parts.length === 2){
+      const mm = parseFloat(sanitizeNumber(parts[0])); const ss = parseFloat(sanitizeNumber(parts[1]));
+      if(!Number.isFinite(mm) || !Number.isFinite(ss) || ss>=60) return NaN; return Math.round(mm*60+ss);
+    }
+    if(parts.length === 3){
+      const hh = parseFloat(sanitizeNumber(parts[0])); const mm = parseFloat(sanitizeNumber(parts[1])); const ss = parseFloat(sanitizeNumber(parts[2]));
+      if([hh,mm,ss].some(x=>!Number.isFinite(x)) || mm>=60 || ss>=60) return NaN; return Math.round(hh*3600+mm*60+ss);
+    }
+    return NaN;
+  }
+
+  function formatHMS(totalSeconds){
+    if(!Number.isFinite(totalSeconds)) return '—';
+    totalSeconds = Math.round(totalSeconds);
+    const sign = totalSeconds < 0 ? '-' : '';
+    totalSeconds = Math.abs(totalSeconds);
+    const hh = Math.floor(totalSeconds / 3600);
+    const mm = Math.floor((totalSeconds % 3600) / 60);
+    const ss = totalSeconds % 60;
+    const pad = n => String(n).padStart(2,'0');
+    return (hh>0 ? `${sign}${pad(hh)}:${pad(mm)}:${pad(ss)}` : `${sign}${pad(mm)}:${pad(ss)}`);
+  }
+
+  function paceRounded(sec){
+    if(roundMode==='sec') return Math.round(sec);
+    if(roundMode==='5sec') return Math.round(sec/5)*5;
+    if(roundMode==='10sec') return Math.round(sec/10)*10;
+    return sec;
+  }
+  function currentUnitLabel(){ return units==='km' ? '/km' : '/mi'; }
+  function speedFromPace(secPerUnit){ const hours = secPerUnit/3600; return 1/hours; }
+
+  function compute(){
+    const mode = getMode();
+    const d = parseDistance(distance.value);
+    const p = parseHMS(pace.value);
+    const t = parseHMS(time.value);
+    clearError();
+    try{
+      if(mode==='time'){
+        if(!Number.isFinite(d) || !Number.isFinite(p)) throw new Error('Necesitas distancia y ritmo.');
+        const timeSec = Math.round(d*p); showTimeResult(timeSec, p);
+      }else if(mode==='pace'){
+        if(!Number.isFinite(d) || !Number.isFinite(t)) throw new Error('Necesitas distancia y tiempo.');
+        const paceSec = t/d; showPaceResult(paceSec, t);
+      }else{
+        if(!Number.isFinite(t) || !Number.isFinite(p)) throw new Error('Necesitas tiempo y ritmo.');
+        const dist = t/p; showDistanceResult(dist, p, t);
+      }
+    }catch(err){ showError(err.message||String(err)); }
+  }
+
+  function showTimeResult(timeSec, paceSec){
+    mainResult.textContent = `Tiempo: ${formatHMS(timeSec)}`;
+    const spd = speedFromPace(paceRounded(paceSec));
+    subResult.innerHTML = `Ritmo: <span class="mono">${formatHMS(paceRounded(paceSec))} ${currentUnitLabel()}</span> • Velocidad: <span class="mono">${spd.toFixed(2)} km/h</span>`;
+  }
+  function showPaceResult(paceSec, timeSec){
+    const rounded = paceRounded(paceSec);
+    const spd = speedFromPace(rounded);
+    mainResult.textContent = `Ritmo: ${formatHMS(rounded)} ${currentUnitLabel()}`;
+    subResult.innerHTML = `Tiempo: <span class="mono">${formatHMS(timeSec)}</span> • Velocidad: <span class="mono">${spd.toFixed(2)} km/h</span>`;
+  }
+  function showDistanceResult(dist, paceSec, timeSec){
+    const rounded = paceRounded(paceSec);
+    const spd = speedFromPace(rounded);
+    mainResult.textContent = `Distancia: ${dist.toFixed(2)} km`;
+    subResult.innerHTML = `Ritmo: <span class="mono">${formatHMS(rounded)} ${currentUnitLabel()}</span> • Tiempo: <span class="mono">${formatHMS(timeSec)}</span> • Velocidad: <span class="mono">${spd.toFixed(2)} km/h</span>`;
+  }
+
+  function getMode(){ return document.getElementById('modo-tiempo').checked ? 'time' : (document.getElementById('modo-ritmo').checked ? 'pace' : 'distance'); }
+  function updateVisibility(){
+    document.getElementById('paceBlock').style.display = (getMode()==='pace') ? 'none' : '';
+    document.getElementById('timeBlock').style.display = (getMode()==='time') ? 'none' : '';
+  }
+  function setUnits(u){
+    units = u; document.getElementById('unitDistance').textContent = u; document.getElementById('unitPace').textContent = (u==='km'?'/km':'/mi');
+    document.getElementById('kmBtn').setAttribute('aria-pressed', u==='km'?'true':'false');
+    document.getElementById('miBtn').setAttribute('aria-pressed', u==='mi'?'true':'false');
+  }
+  function clearError(){ subResult.classList.remove('error'); }
+  function showError(msg){ mainResult.textContent='—'; subResult.textContent=msg; subResult.classList.add('error'); }
+
+  document.getElementById('kmBtn').addEventListener('click', () => setUnits('km'));
+  document.getElementById('miBtn').addEventListener('click', () => setUnits('mi'));
+  document.querySelectorAll('input[name="modo"]').forEach(r => r.addEventListener('change', ()=>{ updateVisibility(); mainResult.textContent='—'; subResult.textContent=''; }));
+  document.querySelectorAll('input[name="round"]').forEach(r => r.addEventListener('change', (e)=>{ window.roundMode = e.target.value; if(mainResult.textContent!=='—') compute(); }));
+  document.getElementById('calc').addEventListener('click', compute);
+  [distance, pace, time].forEach(inp => inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') compute(); }));
+  document.getElementById('swap').addEventListener('click', ()=>{ const a = pace.value; pace.value = time.value; time.value = a; });
+  document.getElementById('reset').addEventListener('click', ()=>{ distance.value=''; pace.value=''; time.value=''; mainResult.textContent='—'; subResult.textContent=''; });
+
+  document.getElementById('copy').addEventListener('click', async ()=>{
+    const text = `${mainResult.textContent} (${subResult.textContent})`;
+    try{ await navigator.clipboard.writeText(text); const b = document.getElementById('copy'); b.textContent='Copiado ✓'; setTimeout(()=>b.textContent='Copiar', 1200);}catch{ alert('No se pudo copiar.'); }
+  });
+  document.getElementById('share').addEventListener('click', async ()=>{
+    const data = { title:'Resultado calculadora', text:`${mainResult.textContent} (${subResult.textContent})`, url: location.href };
+    try{ if(navigator.share){ await navigator.share(data); } else { await navigator.clipboard.writeText(`${data.text} ${data.url}`); alert('Compartido (copiado).'); } }catch{}
+  });
+
+  updateVisibility();
+  distance.value = '9.70'; pace.value='4:40';
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(console.error); });
+  }
+})();
+</script>
+</body>
+</html>
