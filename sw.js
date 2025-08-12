@@ -1,5 +1,5 @@
-const CACHE_NAME = 'carrera-calc-v1';
-const APP_SHELL = ['./','./index.html','./manifest.webmanifest','./sw.js','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE_NAME = 'carrera-calc-v2';
+const APP_SHELL = ['./','./index.html','./manifest.webmanifest?v=2','./sw.js','./icons/icon-192.png?v=2','./icons/icon-512.png', './icons/apple-touch-icon.png?v=2'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

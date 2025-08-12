@@ -3,44 +3,118 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
 <title>Calculadora de carrera — PWA</title>
-<meta name="theme-color" content="#22c55e" />
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png" sizes="192x192">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- Colores del navegador (con soporte light/dark y fallbacks) -->
+<meta name="theme-color" content="#22c55e" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<meta name="msapplication-TileColor" content="#0f172a">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="icon" href="icons/icon-192.png?v=2" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2" sizes="180x180">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CarreraCalc">
+
 <style>
   :root{
     --bg:#0f172a; --panel:#111827; --panel-2:#1f2937; --text:#e5e7eb; --muted:#9ca3af;
     --brand:#22c55e; --brand-2:#16a34a; --error:#ef4444; --focus:#93c5fd;
   }
   *{box-sizing:border-box}
-  body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     background: radial-gradient(1200px 600px at 20% -10%, #1e293b, transparent), var(--bg);
-    color:var(--text); line-height:1.4; min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; }
-  .app{ width:min(880px, 100%); background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-    border:1px solid #1f2937; border-radius:16px; padding:22px; box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06); backdrop-filter: blur(6px); }
+    color:var(--text);
+    line-height:1.4;
+    min-height:100dvh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+
+  .app{
+    width:min(880px, 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border:1px solid #1f2937;
+    border-radius:16px;
+    padding:22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+
+    /* Compat Safari/iOS: usa el prefijo y, si no hay soporte, aplica fallback más abajo */
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    backdrop-filter: saturate(180%) blur(12px);
+  }
+
+  /* Fallback si NO hay soporte de (backdrop-filter || -webkit-backdrop-filter) */
+  @supports not ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))){
+    .app{
+      /* Fondo sólido sin blur para evitar el warning y que se vea bien igualmente */
+      background: #111827;
+    }
+  }
+
   header{ display:flex; gap:14px; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  h1{font-size:1.25rem; margin:0;} .sub{color:var(--muted); font-size:.95rem}
+  h1{font-size:1.25rem; margin:0;}
+  .sub{color:var(--muted); font-size:.95rem}
   .row{display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px;}
-  @media (min-width:720px){ .row.two{grid-template-columns: 1fr 1fr;} .row.layout{grid-template-columns: 1fr 2fr;} }
-  .card{ background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid var(--panel-2); border-radius:12px; padding:14px; }
-  label{display:block; font-weight:600; margin-bottom:6px;} .hint{font-size:.85rem; color:var(--muted); margin-top:4px}
-  .field{ display:flex; align-items:center; gap:10px; border:1px solid #374151; border-radius:10px; padding:10px 12px; background:#0b1222; }
-  .field input{ background:transparent; border:0; color:var(--text); outline:none; width:100%; font-size:1rem; }
-  .segmented{ display:flex; background:#0b1222; border:1px solid #374151; border-radius:10px; padding:6px; gap:6px; }
+  @media (min-width:720px){
+    .row.two{grid-template-columns: 1fr 1fr;}
+    .row.layout{grid-template-columns: 1fr 2fr;}
+  }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border:1px solid var(--panel-2);
+    border-radius:12px;
+    padding:14px;
+  }
+  label{display:block; font-weight:600; margin-bottom:6px;}
+  .hint{font-size:.85rem; color:var(--muted); margin-top:4px}
+  .field{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid #374151; border-radius:10px; padding:10px 12px;
+    background:#0b1222;
+  }
+  .field input, .field select{
+    background:transparent; border:0; color:var(--text); outline:none; width:100%; font-size:1rem;
+  }
+  .segmented{
+    display:flex; background:#0b1222; border:1px solid #374151; border-radius:10px; padding:6px; gap:6px;
+  }
   .segmented input{display:none}
-  .segmented label{ flex:1; text-align:center; padding:10px 8px; border-radius:8px; cursor:pointer; user-select:none; border:1px solid transparent; font-weight:600; }
-  .segmented input:checked + label{ background: var(--brand); color:#052e16; border-color:transparent; }
-  .units{ display:flex; gap:8px; align-items:center; }
-  .units button{ appearance:none; border-radius:8px; padding:8px 12px; background:#0b1222; color:var(--text); border:1px solid #374151; cursor:pointer; font-weight:600; }
+  .segmented label{
+    flex:1; text-align:center; padding:10px 8px; border-radius:8px; cursor:pointer; -webkit-user-select:none; user-select:none;
+    border:1px solid transparent; font-weight:600;
+  }
+  .segmented input:checked + label{
+    background: var(--brand); color:#052e16; border-color:transparent;
+  }
+  .units{
+    display:flex; gap:8px; align-items:center;
+  }
+  .units button{
+    appearance:none; border-radius:8px; padding:8px 12px;
+    background:#0b1222; color:var(--text); border:1px solid #374151; cursor:pointer; font-weight:600;
+  }
   .units button[aria-pressed="true"]{ background:var(--brand); color:#052e16; border-color:transparent; }
-  .btn{ appearance:none; padding:12px 16px; border-radius:10px; border:1px solid #2a333f; background:linear-gradient(180deg, var(--brand), var(--brand-2)); color:#052e16; font-weight:800; cursor:pointer; width:100%; }
+  .btn{
+    appearance:none; padding:12px 16px; border-radius:10px; border:1px solid #2a333f;
+    background:linear-gradient(180deg, var(--brand), var(--brand-2)); color:#052e16; font-weight:800; cursor:pointer;
+    width:100%;
+  }
   .btn.secondary{ background:#0b1222; color:var(--text); border:1px solid #374151; }
-  .result{ display:flex; gap:12px; align-items:center; justify-content:space-between; background:#061227; border:1px solid #1f2a41; border-radius:12px; padding:14px; }
-  .result h2{margin:0; font-size:1.4rem} .result .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-  .muted{color:var(--muted)} .error{color:var(--error); font-weight:600} .footer{margin-top:10px; color:var(--muted); font-size:.9rem}
+  .result{
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+    background:#061227; border:1px solid #1f2a41; border-radius:12px; padding:14px;
+  }
+  .result h2{margin:0; font-size:1.4rem}
+  .result .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+  .muted{color:var(--muted)}
+  .error{color:var(--error); font-weight:600}
+  .footer{margin-top:10px; color:var(--muted); font-size:.9rem}
   .stack{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
 </style>
 </head>
@@ -62,11 +136,11 @@
       <div class="card">
         <div class="segmented" role="tablist" aria-label="Modo de cálculo">
           <input type="radio" id="modo-tiempo" name="modo" value="time" checked>
-          <label for="modo-tiempo" role="tab" aria-controls="panel-tiempo">Calcular <u>Tiempo</u></label>
+          <label for="modo-tiempo" role="tab">Calcular <u>Tiempo</u></label>
           <input type="radio" id="modo-ritmo" name="modo" value="pace">
-          <label for="modo-ritmo" role="tab" aria-controls="panel-ritmo">Calcular <u>Ritmo</u></label>
+          <label for="modo-ritmo" role="tab">Calcular <u>Ritmo</u></label>
           <input type="radio" id="modo-dist" name="modo" value="distance">
-          <label for="modo-dist" role="tab" aria-controls="panel-dist">Calcular <u>Distancia</u></label>
+          <label for="modo-dist" role="tab">Calcular <u>Distancia</u></label>
         </div>
 
         <div class="row two" style="margin-top:14px">
