@@ -1,24 +1,57 @@
 {
-  "name": "Calculadora de carrera",
+  "name": "CarreraCalc · Calculadora de carrera",
   "short_name": "CarreraCalc",
-  "description": "Calcula ritmo, tiempo, distancia y velocidad para tus entrenos y carreras.",
+  "description": "Calcula ritmo, tiempo, distancia, proyecciones, desnivel y zonas de entrenamiento.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f8fb",
+  "theme_color": "#0f9f6e",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calcular tiempo",
+      "short_name": "Tiempo",
+      "url": "./index.html?mode=time",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calcular ritmo",
+      "short_name": "Ritmo",
+      "url": "./index.html?mode=pace",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calcular distancia",
+      "short_name": "Distancia",
+      "url": "./index.html?mode=distance",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

@@ -1,112 +1,76 @@
-# Calculadora de carrera (PWA)
+# CarreraCalc · Calculadora de carrera
 
-Pequeña app web para calcular **ritmo, tiempo, distancia y velocidad** en carreras y entrenos. Funciona como **Aplicación Web Progresiva (PWA)**: puedes **instalarla** en tu móvil y usarla **sin conexión**.
+Versión refactorizada y rediseñada de la calculadora original. La app sigue siendo estática, ligera e instalable como PWA, pero ahora está pensada primero para móvil: interfaz clara, controles grandes, secciones avanzadas plegadas y lógica separada por módulos.
 
-> URL recomendada: publícala en GitHub Pages/Vercel/Netlify para servirla por **HTTPS** y habilitar el modo **offline**.
+## Mejoras incluidas
 
----
+- **UI mobile-first**: pantalla principal más limpia, menos ruido visual, acciones principales accesibles y botones táctiles grandes.
+- **Experiencia simplificada**: el historial y las herramientas avanzadas están en desplegables para no saturar la vista móvil.
+- **Accesibilidad mejorada**: uso de `fieldset`, `legend`, `label`, `aria-live`, `summary/details`, foco visible y zonas táctiles de al menos 48 px.
+- **Código menos redundante**: `app.js` queda como orquestador y el renderizado se reparte en módulos `src/js/ui/`.
+- **Conversión km/mi real**: distancia, ritmo, ritmo umbral, proyecciones y métricas se convierten correctamente.
+- **Parsers sólidos**: ritmo y tiempo aceptan formatos comunes como `4:40`, `4'40`, `4.5`, `45:16`, `1:25:30`, `90` o `5400s`.
+- **PWA corregida**: manifest estático, iconos reales y service worker propio sin Workbox externo.
+- **Tests incluidos** para cálculo, parsers, unidades, proyecciones y zonas.
 
-## ✨ Características
-- Conversión entre **Ritmo (min/km o min/mi)**, **Tiempo (hh:mm:ss)** y **Distancia (km o mi)**.
-- Cálculo de **velocidad** (km/h o mph).
-- Selector de **unidades**: km ↔ mi.
-- Redondeo del ritmo: exacto, al segundo, a 5 s, a 10 s.
-- **PWA**: instalable y usable **offline** (service worker + caché).
-- Interfaz responsive y accesible, con soporte para introducir formatos flexibles (`4:40`, `00:45:16`, `4'40`).
+## Estructura
 
----
-
-## 📁 Estructura del proyecto
-```
+```txt
 .
-├─ index.html              # App principal (UI + lógica)
-├─ manifest.webmanifest    # Manifest PWA (nombre, iconos, colores)
-├─ sw.js                   # Service Worker (caché + offline)
-└─ icons/
-   ├─ icon-192.png
-   └─ icon-512.png
+├─ index.html
+├─ manifest.webmanifest
+├─ sw.js
+├─ icons/
+├─ src/
+│  ├─ js/
+│  │  ├─ app.js
+│  │  ├─ calculator.js
+│  │  ├─ constants.js
+│  │  ├─ dom.js
+│  │  ├─ formatters.js
+│  │  ├─ pwa.js
+│  │  ├─ storage.js
+│  │  ├─ units.js
+│  │  └─ ui/
+│  │     ├─ elements.js
+│  │     ├─ formUi.js
+│  │     ├─ historyUi.js
+│  │     ├─ projectionUi.js
+│  │     ├─ resultUi.js
+│  │     └─ zonesUi.js
+│  └─ styles/
+│     ├─ tokens.css
+│     ├─ base.css
+│     ├─ layout.css
+│     ├─ components.css
+│     └─ responsive.css
+├─ tests/
+│  └─ calculator.test.js
+├─ package.json
+├─ .nojekyll
+└─ .gitignore
 ```
 
----
+## Uso local
 
-## 🚀 Uso rápido (web)
-1. Sube estos archivos a un hosting **HTTPS** (p. ej., GitHub Pages).
-2. Abre la URL en tu navegador. En móvil, añade a **pantalla de inicio** para instalar.
-
-### Despliegue en GitHub Pages
-**Opción 1: Web**
-1. Crea un repositorio (por ej., `carrera-calc`) y sube `index.html`, `manifest.webmanifest`, `sw.js` e `icons/` (mantén la estructura).
-2. En el repo: **Settings → Pages** → *Build and deployment*: **Deploy from a branch** → Branch **main** y carpeta **/(root)** → **Save**.
-3. Espera ~1–10 min y abre la URL publicada (HTTPS).
-
-**Opción 2: Terminal**
 ```bash
-git init
-git add .
-git commit -m "PWA inicial"
-git branch -M main
-git remote add origin https://github.com/TU_USUARIO/carrera-calc.git
-git push -u origin main
-```
-Luego activa Pages como en la Opción 1 (Settings → Pages).
-
-> Si usas carpetas/archivos que empiecen por `_` o necesitas desactivar Jekyll, añade un archivo vacío llamado `.nojekyll` en la raíz.
-
----
-
-## 🧪 Desarrollo local
-Para probar en tu Mac:
-```bash
-# dentro de la carpeta del proyecto
 python3 -m http.server 8080
 ```
-Abre `http://localhost:8080`.  
-> El service worker solo funciona en **http(s)** o **localhost** (no en `file://`).
 
----
+Abre:
 
-## 📲 Instalar como PWA
-- **iPhone (Safari)**: abre la URL **HTTPS** → **Compartir → Añadir a pantalla de inicio** → **Añadir**.  
-- **Android (Chrome)**: abre la URL → botón **Instalar** o **Añadir a pantalla de inicio**.  
-- **Escritorio**: Chrome/Edge mostrarán “Instalar app” en la barra de direcciones.
-
-Primera carga **online**: abre la app una vez con conexión para que el **service worker** guarde los recursos. Luego podrás usarla **offline**.
-
----
-
-## 🛠️ Personalización
-- **Nombre/colores/iconos**: edita `manifest.webmanifest` (propiedades `name`, `short_name`, `theme_color`, `background_color`) y reemplaza los PNG de `icons/`.
-- **Título y tema**: en `index.html`, cambia `<title>` y estilos CSS.
-- **Favicon**: apunta `<link rel="icon">` a tu icono.
-
----
-
-## 🔁 Actualizaciones y caché
-El service worker usa caché “app shell”. Tras cambiar archivos, aumenta la versión de caché en `sw.js`:
-```js
-const CACHE_NAME = 'carrera-calc-v2'; // cambia la versión
+```txt
+http://localhost:8080
 ```
-Sube los cambios. Los navegadores actualizarán el SW automáticamente en el siguiente arranque de la app.
 
----
+O con Node:
 
-## ♿ Accesibilidad y formato de entrada
-- Soporta `mm:ss`, `hh:mm:ss` y también `m'ss` (ej.: `4'40`).
-- Campos con `inputmode` numérico para facilitar el teclado en móviles.
-- Región de resultados con `aria-live="polite"`.
+```bash
+npm run start
+```
 
----
+## Tests
 
-## ❗Notas
-- iOS exige **HTTPS** para que el service worker funcione fuera de `localhost`.
-- Si no ves el botón “Instalar” en iOS, usa **Compartir → Añadir a pantalla de inicio** (comportamiento normal en Safari).
-
----
-
-## 📄 Licencia
-Elige la que prefieras. Recomendación: **MIT** para máxima simplicidad.
-
----
-
-## 🙌 Créditos
-Proyecto generado para @Juanjo como utilidad de cálculo de ritmos/tiempos/distancias en carrera.
+```bash
+npm test
+```

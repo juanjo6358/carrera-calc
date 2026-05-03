@@ -1,0 +1,11 @@
+{
+  "name": "carrera-calc-refactor",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Calculadora de carrera PWA refactorizada: ritmo, tiempo, distancia, proyecciones, desnivel y zonas.",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test tests/*.test.js"
+  }
+}
