@@ -2,8 +2,8 @@
   "name": "CarreraCalc · Calculadora de carrera",
   "short_name": "CarreraCalc",
   "description": "Calcula ritmo, tiempo, distancia, proyecciones, desnivel y zonas de entrenamiento.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f6f8fb",
@@ -38,19 +38,19 @@
     {
       "name": "Calcular tiempo",
       "short_name": "Tiempo",
-      "url": "./index.html?mode=time",
+      "url": "/?mode=time",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Calcular ritmo",
       "short_name": "Ritmo",
-      "url": "./index.html?mode=pace",
+      "url": "/?mode=pace",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Calcular distancia",
       "short_name": "Distancia",
-      "url": "./index.html?mode=distance",
+      "url": "/?mode=distance",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
