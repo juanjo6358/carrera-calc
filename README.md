@@ -1,76 +1,36 @@
-# CarreraCalc · Calculadora de carrera
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-Versión refactorizada y rediseñada de la calculadora original. La app sigue siendo estática, ligera e instalable como PWA, pero ahora está pensada primero para móvil: interfaz clara, controles grandes, secciones avanzadas plegadas y lógica separada por módulos.
+## Getting Started
 
-## Mejoras incluidas
-
-- **UI mobile-first**: pantalla principal más limpia, menos ruido visual, acciones principales accesibles y botones táctiles grandes.
-- **Experiencia simplificada**: el historial y las herramientas avanzadas están en desplegables para no saturar la vista móvil.
-- **Accesibilidad mejorada**: uso de `fieldset`, `legend`, `label`, `aria-live`, `summary/details`, foco visible y zonas táctiles de al menos 48 px.
-- **Código menos redundante**: `app.js` queda como orquestador y el renderizado se reparte en módulos `src/js/ui/`.
-- **Conversión km/mi real**: distancia, ritmo, ritmo umbral, proyecciones y métricas se convierten correctamente.
-- **Parsers sólidos**: ritmo y tiempo aceptan formatos comunes como `4:40`, `4'40`, `4.5`, `45:16`, `1:25:30`, `90` o `5400s`.
-- **PWA corregida**: manifest estático, iconos reales y service worker propio sin Workbox externo.
-- **Tests incluidos** para cálculo, parsers, unidades, proyecciones y zonas.
-
-## Estructura
-
-```txt
-.
-├─ index.html
-├─ manifest.webmanifest
-├─ sw.js
-├─ icons/
-├─ src/
-│  ├─ js/
-│  │  ├─ app.js
-│  │  ├─ calculator.js
-│  │  ├─ constants.js
-│  │  ├─ dom.js
-│  │  ├─ formatters.js
-│  │  ├─ pwa.js
-│  │  ├─ storage.js
-│  │  ├─ units.js
-│  │  └─ ui/
-│  │     ├─ elements.js
-│  │     ├─ formUi.js
-│  │     ├─ historyUi.js
-│  │     ├─ projectionUi.js
-│  │     ├─ resultUi.js
-│  │     └─ zonesUi.js
-│  └─ styles/
-│     ├─ tokens.css
-│     ├─ base.css
-│     ├─ layout.css
-│     ├─ components.css
-│     └─ responsive.css
-├─ tests/
-│  └─ calculator.test.js
-├─ package.json
-├─ .nojekyll
-└─ .gitignore
-```
-
-## Uso local
+First, run the development server:
 
 ```bash
-python3 -m http.server 8080
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Abre:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```txt
-http://localhost:8080
-```
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-O con Node:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-npm run start
-```
+## Learn More
 
-## Tests
+To learn more about Next.js, take a look at the following resources:
 
-```bash
-npm test
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
